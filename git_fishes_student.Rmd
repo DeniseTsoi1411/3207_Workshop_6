@@ -93,7 +93,7 @@ Write your answer in the code chunk below:
 
 ```{r, loaddata, eval = FALSE, echo=TRUE}
 
-path <- "C:/Users/Denise Tsoi/OneDrive/Documents/GitHub/3207_Workshop_6/Git amp; GitHub Workshop Materials-20220902/OA_activitydat_20190302_BIOL3207.csv"
+path <- ".C:/Users/Denise Tsoi/OneDrive/Documents/GitHub/3207_Workshop_6/Git amp; GitHub Workshop Materials-20220902/OA_activitydat_20190302_BIOL3207.csv"
   
 data <- read_csv(path)
 
