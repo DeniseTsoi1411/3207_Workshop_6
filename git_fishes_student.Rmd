@@ -93,7 +93,7 @@ Write your answer in the code chunk below:
 
 ```{r, loaddata, eval = FALSE, echo=TRUE}
 
-path <- ".C:/Users/Denise Tsoi/OneDrive/Documents/GitHub/3207_Workshop_6/Git amp; GitHub Workshop Materials-20220902/OA_activitydat_20190302_BIOL3207.csv"
+path <- "./Files/OA_activitydat_20190302_BIOL3207.csv"
   
 data <- read_csv(path)
 
@@ -127,28 +127,30 @@ Second, drop out irrelevant columns and check that there are no spelling issues 
 ```{r summaryTab}
 # Drop irrelevant columns
 data_n <- subset(data, select = -c(...1, comment))
-table(data_n$animal_id)
+table(data_n$animal_id) #Found that there are some repeated animal IDs (Not unique)
+
 # Check spelling in species and treatment but also generate a summary table
-library(tidyverse)
 
 table(data$species) #Doesnt seem to have any spelling mistakes
 table(data$treatment) #Doesnt seem to have any spelling mistakes
 
 unique <- data_n[!duplicated(data_n[,"animal_id"]),] #Kept unique values
-unique %>% group_by(species, treatment) %>% summarise(mean=mean(activity), 
+unique_g <- unique %>% group_by(species, treatment) %>% summarise(mean=mean(activity), 
                                                       n = length(activity), 
                                                       se = sd(activity) / sqrt(n))
+  # Shows numerical information of unique animals
 
-data_n %>% group_by(species, treatment) %>% summarise(mean = mean(activity), 
+data_g <- data_n %>% group_by(species, treatment) %>% summarise(mean = mean(activity), 
                                                       n = length(activity), 
                                                       se = sd(activity) / sqrt(n))
-data_n
+  # Numerical information of animals excluding animal IDs
+
 # Use flextable to render the summary table in a tidy format
-install.packages("flextable")
+
 library(flextable)
 
-
-######## FINISHHH
+add_footer_lines(flextable(data_g), "Numeric information for all species")
+add_footer_lines(flextable(unique_g), "Numeric information for unique species")
 ```
 
 **STOP**: Before moving on, it's a good time to establish some good *GitHub* practices. You have just done an important step. It's time to save this file, stage it and commit it so that you have a record. Push these changes up using *GitHub Desktop*. It's important to do this frequently. It's probably not needed after every line of code, but it's good to do this when you have completed an important coding step. Of course, there's no harm in doing it more often. It will provide fine-scale tracking for you!
