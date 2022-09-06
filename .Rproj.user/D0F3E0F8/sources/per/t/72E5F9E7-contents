@@ -93,7 +93,7 @@ Write your answer in the code chunk below:
 
 ```{r, loaddata, eval = FALSE, echo=TRUE}
 
-path <- "./Files/OA_activitydat_20190302_BIOL3207.csv"
+path <- ".C:/Users/Denise Tsoi/OneDrive/Documents/GitHub/3207_Workshop_6/Git amp; GitHub Workshop Materials-20220902/OA_activitydat_20190302_BIOL3207.csv"
   
 data <- read_csv(path)
 
@@ -127,30 +127,28 @@ Second, drop out irrelevant columns and check that there are no spelling issues 
 ```{r summaryTab}
 # Drop irrelevant columns
 data_n <- subset(data, select = -c(...1, comment))
-table(data_n$animal_id) #Found that there are some repeated animal IDs (Not unique)
-
+table(data_n$animal_id)
 # Check spelling in species and treatment but also generate a summary table
+library(tidyverse)
 
 table(data$species) #Doesnt seem to have any spelling mistakes
 table(data$treatment) #Doesnt seem to have any spelling mistakes
 
 unique <- data_n[!duplicated(data_n[,"animal_id"]),] #Kept unique values
-unique_g <- unique %>% group_by(species, treatment) %>% summarise(mean=mean(activity), 
+unique %>% group_by(species, treatment) %>% summarise(mean=mean(activity), 
                                                       n = length(activity), 
                                                       se = sd(activity) / sqrt(n))
-  # Shows numerical information of unique animals
 
-data_g <- data_n %>% group_by(species, treatment) %>% summarise(mean = mean(activity), 
+data_n %>% group_by(species, treatment) %>% summarise(mean = mean(activity), 
                                                       n = length(activity), 
                                                       se = sd(activity) / sqrt(n))
-  # Numerical information of animals excluding animal IDs
-
+data_n
 # Use flextable to render the summary table in a tidy format
-
+install.packages("flextable")
 library(flextable)
 
-flex_data <- add_footer_lines(flextable(data_g), "Numeric information for all species")
-dlex_unique <- add_footer_lines(flextable(unique_g), "Numeric information for unique species")
+
+######## FINISHHH
 ```
 
 **STOP**: Before moving on, it's a good time to establish some good *GitHub* practices. You have just done an important step. It's time to save this file, stage it and commit it so that you have a record. Push these changes up using *GitHub Desktop*. It's important to do this frequently. It's probably not needed after every line of code, but it's good to do this when you have completed an important coding step. Of course, there's no harm in doing it more often. It will provide fine-scale tracking for you!
@@ -158,7 +156,7 @@ dlex_unique <- add_footer_lines(flextable(unique_g), "Numeric information for un
 >**Question 5**: The new version of your Rmarkdown file should now be up on *GitHub*. In the browser window click on your most recent commit. Have a look at the file versioning system. You will notice two files side-by-side. Describe what you notice is being presented online. What do the red and green highlights mean?
 
 ```{r answer5, echo=TRUE, eval=FALSE}
-# The online shows the differences between the old and new versions of the same file. The red represents the version before it was committed, while the green shows the new version of the same file. 
+## Write your answer here....remember to use '#" in front of your text.
 ```
 
 # **Task 5**
@@ -169,8 +167,7 @@ Ignoring figures can be important because they take up quite a lot of space in y
 
 ```{r, prettyfig, fig.align='center', fig.cap="add a legend here"}
 # ggplot figure showing mean activity for each treatment (Control, OA) for each species.
-library(ggplot2)
-ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment)) + labs(title = "Mean activity of each species depending on the treatment", x = "Species", y = "Mean activity")
+
 
 ```
 
