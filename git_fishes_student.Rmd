@@ -183,8 +183,6 @@ Now that you have the figure you may also want to write / save it as a separate 
 ```{r, savefig}
 # Use ggsave to save the figure
 library(png)
-img1 <- readPNG("./Files/pics/acantho.png")
-raster1 <- as.raster(img1)
 
 ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment)) + 
   labs(title = "Mean activity of each species depending on the treatment", x = "Species", y = "Mean activity") +
@@ -219,8 +217,6 @@ Now, lets create a new figure in the code block below that simplifies the one pr
 
 ```{r, collabFig, echo=TRUE, eval=TRUE, fig.cap = "Task 6 CollabFig by Angelene}
 # You want to make changes to your collaborators figure in Task 5. Maybe you want to create a figure that focuses only on three fish species instead of the 5. More specifically, chromis, lemon, and acantho. Add code here to revise their figure to do that.
-
-
 ```
 
 # **Task 7**
@@ -264,23 +260,72 @@ mean(control$activity) # 28
 sd(control$activity) # 13
   # Can infer that they have similar enough mean and standard deviation to do 2 sample t test
 
-# anova_data <- aov(mean ~ treatment + species, data = data_g)
-# summary(anova_data)
-# 
-# t.test(treat, control, var.equal = T )
-# data_n
+### METHOD 1: Doing t test to each species individually
+ancantho <- data_n[which(data_n$species == "acantho"),] %>% subset(select = -c(loc, animal_id, sl, size))
+ambon <- data_n[which(data_n$species == "ambon"),] %>% subset(select = -c(loc, animal_id, sl, size))
+lemon <- data_n[which(data_n$species == "lemon"),] %>% subset(select = -c(loc, animal_id, sl, size))
+chromis <- data_n[which(data_n$species == "chromis"),] %>% subset(select = -c(loc, animal_id, sl, size))
+humbug <- data_n[which(data_n$species == "humbug"),] %>% subset(select = -c(loc, animal_id, sl, size))
+whitedams <- data_n[which(data_n$species == "whitedams"),] %>% subset(select = -c(loc, animal_id, sl, size))
 
-mod1 <- lm(activity ~ treatment * species, data = data_n)
-anova(mod1)
+test_ancantho <- t.test(ancantho$activity ~ ancantho$treatment, var.equal = T)
+test_ancantho <- test_ancantho[c(1:5)]
+  # Difference in mean = 2
+  # 95% confidence interval = -4.9 to 1.6
+  # t statistic = -1
+  # df = 174
+  # p-value = 0.3
+test_ambon <- t.test(ambon$activity ~ ambon$treatment, var.equal = T)
+test_ambon <- test_ambon[c(1:5)]
+  # Difference in mean = 1
+  # 95% confidence interval = -6.2 to 8.3
+  # t statistic = 0.3
+  # df = 41
+  # p-value = 0.8
+test_lemon <- t.test(lemon$activity ~ lemon$treatment, var.equal = T)
+test_lemon <- test_lemon[c(1:5)]
+  # Difference in mean = 6
+  # 95% confidence interval = -0.7 to 13.2
+  # t statistic = 2
+  # df = 47
+  # p-value = 0.08
+test_chromis <- t.test(chromis$activity ~ chromis$treatment, var.equal = T)
+test_chromis <- ttest_chromis[c(1:5)]
+  # Difference in mean = 1
+  # 95% confidence interval = -8.4 to 5.7
+  # t statistic = -0.4
+  # df = 32
+  # p-value = 0.7
+test_humbug <- t.test(humbug$activity ~ humbug$treatment, var.equal = T)
+test_humbug <- test_humbug[c(1:5)]
+  # Difference in mean = 5
+  # 95% confidence interval = 0.82 to 9.92
+  # t statistic = 2
+  # df = 125
+  # p-value = 0.02
+test_whitedams <- t.test(whitedams$activity ~ whitedams$treatment, var.equal = T) 
+test_whitedams <- test_whitedams[c(1:5)]
+tibble(test_whitedams = list()) %>% 
+   unnest_wider(test_whitedams, names_sep = "")
+]\
+ # subset(select = c("statistic", "parameter", "p.value", "conf.int", "estimate"))
+  # Difference in mean = 3
+  # 95% confidence interval = -5.9 to 1.6
+  # t statistic = -1
+  # df = 119
+  # p-value = 0.3
+
+### METHOD 2: Tried to do via ANOVA (Did not work )
+mod1 <- group_by(species) %>% (lm(activity ~ treatment * species, data = data_n)
 summary(mod1)
 
   # Ancantho is the base level (Hence the first couple 'species' line shows the difference in means of that species compared to base level(Ancantho) when the treatment is held constant)
-  # Last 5 lines 
-
 ```
 
-```{r, table1, echo=TRUE, eval=TRUE, tab.cap = "write a caption here"}
+```{r, table1, echo=TRUE, eval=TRUE, tab.cap = "T statistic summary of difference in treatment on the species"}
 # Using the resulting object created above, which should be a table with all the summary statistics, t, df and p-value for each species create a table. Note that there is a tab.cap argument in the chunk arguments. Write a caption here. 
+final_table <- 
+  list(test_whitedams)
 ```
 
 Now that you have a table, you can reference it within a document. For example, you can make a call to Table \@ref(tab:table1) by referring to the name of the code chunk. When you knit the html it will create a hyperlink to your table and insert a legend above the table for you. How cool is that!?
