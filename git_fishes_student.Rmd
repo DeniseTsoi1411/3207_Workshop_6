@@ -91,12 +91,6 @@ ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment))
 
 ```
 
-**Stretch Task**: The Clark et al. 2020 paper plots some pretty pictures on their figures. You have access to a folder called "pics/". Add the pics of the difference species from the "pics/" folder to your new plot. Explore the function `annotation_raster()` which might help you achieve this goal.
-
-Note the code chunk used to make the figure. It has a `fig.cap` argument. That means Rmarkdown knows it's a figure and it will allow you to create a figure reference call. In other words, we can refer to our Figure \@ref(fig:prettyfig) by referring to the label for the chunk. This will automatically make a legend for us too (assuming you add one in). The same concept applied to Tables but the legend goes above these.
-
-Now that you have the figure you may also want to write / save it as a separate file. Use `ggsave` function to save the figure(s) to your new `output/figures/`:
-
 ```{r, savefig}
 # Use ggsave to save the figure
 library(png)
@@ -113,69 +107,20 @@ ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment))
 ggsave("./Files/Output/Figures/raster_plot.png", width = 6, height = 8)
 ```
 
->**Question 6**: Given that you have added `output/figures/` to your `.gitignore` file describe what you notice about what you see in *GitHub Desktop*. 
-
-```{r}
-# Can see that the file is within the folders with 4 lines of code
-```
-
-Last question for this task. I promise! It's important to think very carefully about what you track and ignore.
-
->**Question 7**: Assume that you added the `pics/` folder to your working directory to plot pictures of each fish on your figure. Do you want to track the files in the pic/ folder on GitHub despite them being .png files? Explain your reasoning. 
-
-```{r, answer6}
-# Yes we do want to track it. For example, the name and file details is important in making sure that it is reproducable for a third-party, such as working with Github etc.
-```
-
-# **Task 6**
-This task involves teaming up with a collaborator. Exchange *GitHub* username details and add each other to your repo. Clone each others' repo on to your computer. Re-run their code. Does it work? If not, correct it for them. Explain to them WHY it didn't work. After all, they are right beside you! Think carefully about this. Will it still run on their computer if you have corrected it in a certain way?
-
-Now, lets create a new figure in the code block below that simplifies the one produced in **Task 5**. Instead of all species, lets just plot three of the species (chromis, lemon, and acantho). In the figure code chunk make sure you add the necessary arguments (e.g., `fig.cap`) so that you can refer to Figure \@ref(fig:collabFig).
-
-```{r, collabFig, echo=TRUE, eval=TRUE, fig.cap = "Task 6 CollabFig by Angelene}
-# You want to make changes to your collaborators figure in Task 5. Maybe you want to create a figure that focuses only on three fish species instead of the 5. More specifically, chromis, lemon, and acantho. Add code here to revise their figure to do that.
-```
-
-# **Task 7**
-This task involves creating and resolving conflicts. Conflicts in files are denoted with specific markers. They look like this when you open a file with conflicts.
-
- <<<<<<<<< HEAD
-  
-  THIS IS YOUR CODE
-  
- ==============
-  
-  THIS IS YOUR PARTNERS CODE
-  
- !>>>>>>>>928731027301723
-
-Resolving is easy. Decide on what changes you think are the best to proceed with and remove conflict markers. 
-
->**Stretch Task**: Try creating another conflict in the `collabFig` code chunk of the Rmarkdown file. Resolve the conflict again. More practice doing this is always good!
-
-Once you have figured out how to create and solve conflicts it's time to update the README file with a little more detail about your project and the general workflow. The *GitHub* webpage uses the README file as a sort of introduction to the project. 
-
-**Task**: Provide details about the workflow (i.e., which files are used, when and why) and write a detailed description of the data file used. Include the details about what the column means and which data file someone should use. 
-
-Think about what you would need to know to make sure you can replicate a study. Provide these details so they are easy to find on the README.
-
-# **Task 8**
-There's not too much to do in this task on the coding front! You just need to create a *GitHub* issue and create a 'To Do' list on *GitHub* for you and your collaborator. 
-
-# **Task 9**
-Here, run some statistical tests to determine, for each species, whether the control vs high $CO^2$ treatments differ significantly from each other and in what direction. Provide the difference in means, their 95% confidence intervals, t-statistic, df and p-value. 
-
->**Stretch Task**: You can of course do this for each species seperately, but those who want a challenge, think about how you might use a loop or even some wrangling methods you have already learnt from the tidyverse to run these tests across all 6 species in a single block of code. If you're familiar with functions, you can even think about writing your own function! All these strategies will avoid having to copy and paste large chunks of code. If you're repeating anything, writing functions and loops are good ways to simplify.
+# ** Statistical testing: 95% Confidence interval, t-statistics, df and p-value **
 
 ```{r, stats, echo=TRUE, eval=TRUE}
+# Analysing the mean and standard deviation to determine direction of statistical analysis
+  # CO2 treatment analysis
 treat <- data_n[which(data_n$treatment == "CO2"),] %>% subset(select = -c(loc, animal_id, sl, size))
 mean(treat$activity) #29
 sd(treat$activity) # 13
 
+  # Control analysis
 control <- data_n[which(data_n$treatment == "control"),] %>% subset(select = -c(loc, animal_id, sl, size))
 mean(control$activity) # 28
 sd(control$activity) # 13
-  # Can infer that they have similar enough mean and standard deviation to do 2 sample t test
+  # Because both groups have the same standard deviation and very similar mean values, we can utilise the 2 sample t test
 
 ### METHOD 1: Doing t test to each species individually
 ancantho <- data_n[which(data_n$species == "acantho"),] %>% subset(select = -c(loc, animal_id, sl, size))
@@ -232,7 +177,7 @@ tibble(test_whitedams = list()) %>%
   # df = 119
   # p-value = 0.3
 
-### METHOD 2: Tried to do via ANOVA (Did not work )
+### METHOD 2: Tried to do via ANOVA (Did not work)
 mod1 <- group_by(species) %>% (lm(activity ~ treatment * species, data = data_n)
 summary(mod1)
 
@@ -240,40 +185,6 @@ summary(mod1)
 ```
 
 ```{r, table1, echo=TRUE, eval=TRUE, tab.cap = "T statistic summary of difference in treatment on the species"}
-# Using the resulting object created above, which should be a table with all the summary statistics, t, df and p-value for each species create a table. Note that there is a tab.cap argument in the chunk arguments. Write a caption here. 
 final_table <- 
   list(test_whitedams)
 ```
-
-Now that you have a table, you can reference it within a document. For example, you can make a call to Table \@ref(tab:table1) by referring to the name of the code chunk. When you knit the html it will create a hyperlink to your table and insert a legend above the table for you. How cool is that!?
-
-> **Question 8**: Pick one of your favorite species and write about the results to a reader. Write in the Rmarkdown file below what 1) the means and mean differences between control and acidification treatment is along with 2) the 95% confidence intervals of the difference
-
-You can write your blurb below this. Before you do that, a few cool features of Rmarkdown. You can actually code in objects so that, when they are rendered they replace the inline code chunk with the result. To give you an example, an inline code chunk is written as follows: `r "add code here"`. When you render the document, whatever you place in the "add code here" section will be rendered. In this case, we are giving a string, so it simply just adds that in the place where the code is, render and see for yourself.  
-
-Moving forward on that you can also add in an object and whatever that objects value is will also be spit out. For example, consider the following: `r x = 10; x`. What will happen? Well, it will place in the value 10 when rendered. Again, if you don't believe me, check for yourself by rendering the document. 
-
-This is all **VERY** cool because that means if your code or data change than you can update your entire report very fast. It's also 100% reproducible. We know exactly where every single value in your report comes from. This is all pretty helpful when you want to check your code and report side-by-side. Now that you have a bit more detail fill in the following:
-
-Mean activity for `r "species name here"` in the control group was `r "add code to place mean for control"` (s / min) compared to the OA treatment group, which was `r "mean for acidificaton treatment"` (s / min). The difference between control and OA treatment means was `r "code mean difference bw treatment"` (s / min) (95% CI: `r "code for lower CI"` to `r "code for upper CI"`). 
-
-Now, using what you just learnt, describe what the null hypothesis being tested was and provide statistical evidence (t-statistic, df, and p-value) to support your conclusion about whether we can reject the null hypothesis. Again, make sure you use in-line code. Write you answer below:
-
-**Write your answer here**
-
-
-Re-analyse the data for a single species using permutations instead of a t-test. Do your results differ?
-
->**Stretch Task**:  If you really want a challenge try doing permutation tests for each species. Again, loops, functions or tidyverse (or even combinations might help). 
-
-```{r, stretch2, echo=TRUE, eval=FALSE}
-# Add your code here.
-```
-
-Below. Add a few sentences for the species (or multiple species) you talked about above to describe the permutation results:
-
-**Add your text and inline code chunks here**
-
-# **Task 10**
-
-This is a stretch task on the use of *GitHub* and the challenges (or maybe lack of challenges) of reproducing others' work. If you finish the above tasks, then, have a crack at this one. See the html for details.
