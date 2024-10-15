@@ -1,8 +1,8 @@
 # Data visualiation on fish activity depending on ocean acidic properties
 ### Project information
-The project focuses on fish activity depending on ocean acidification. This is a collaborative work with Angelene Sun and myself.
+The project focuses on fish activity depending on ocean acidification. This project demonstrates extensive R programming focusing on data wrangling, visualisation and useful statistics that are used for data analysis.
 
-The file used is called: "OA_activitydat_20190302_BIOL3207.csv" and analysis was done during early September. We looked at this dataset to find discrepencies in the original hypothesise that was established by the authors.
+The file used is called: "OA_activitydat_20190302_BIOL3207.csv". We looked at this dataset to find discrepencies in the original hypothesise that was established by the authors.
 
 The data file is a CSV file with 9 columns. While 3 of these are ignored ('...1', 'loc', 'comment') in this analysis, the rest gives information on fish activity depending on the acidification of the water. All 6 species underwent either a control or CO2 treatment, and their "sl" and "activity" were measured. 
 
