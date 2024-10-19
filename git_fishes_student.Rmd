@@ -9,12 +9,15 @@ output:
     toc: yes
     toc_depth: 6
     toc_float: yes
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(digits=2)
 ```
+
 
 # **Installing packages**
 
@@ -25,27 +28,18 @@ This project focuses on utilising techniques such as data visualisation, data wr
 install.packages("pacman", repos = "http://cran.us.r-project.org") #p_load from 'pacman' package allows to seamlessly install many packages at once
 library(pacman)
 
-p_load(bookdown, tidyverse, ggforce, flextable, latex2exp, png, magick) # executes both 'install.packages' and library command
+p_load(bookdown, tidyverse, ggforce, flextable, latex2exp, png, magick, dplyr) # executes both 'install.packages' and library command
 
 ```
 
 
 # **Establishing the path and working directory**
 
-```{r, loaddata, eval = FALSE, echo=TRUE}
+```{r, loaddata}
 
 path <- "./Files/OA_activitydat_20190302_BIOL3207.csv"
   
-data <- read_csv(path)
-
-```
-# **Saving the path name and data together **
-
-```{r, write, eval = FALSE, echo=TRUE}
-
-path <- "C:/Users/Denise Tsoi/OneDrive/Documents/GitHub/3207_Workshop_6"
-
-write_csv(data, file = path)
+my_data <- read.csv(path)
 
 ```
 
@@ -54,12 +48,12 @@ write_csv(data, file = path)
 
 ```{r, rmMiss}
 # Omitting missing data
-data <- na.omit(data)
+my_data1 <- na.omit(my_data)
 ```
 
 ```{r summaryTab}
-# Drop irrelevant columns ('...1' and 'comment')
-data_n <- subset(data, select = -c(...1, comment))
+# Drop irrelevant columns ('X' and 'comment')
+data_n <- my_data1 %>% select(-X, -comment)
 
 # Checking the values within the 'animal_id' column
 table(data_n$animal_id) #Found that there are some repeated animal IDs (Not unique)
@@ -72,45 +66,46 @@ unique_g <- unique %>% group_by(species, treatment) %>% summarise(mean=mean(acti
 data_g <- data_n %>% group_by(species, treatment) %>% summarise(mean = mean(activity), 
                                                       n = length(activity), 
                                                       se = sd(activity) / sqrt(n))
+difference <- data_g[3:5] - unique_g[3:5]
+differences <- data.frame(data_g[1], data_g[2]) %>% cbind(difference)
 # Numerical information of animals excluding animal IDs
 
-# Use 'flextable' to render the summary table in a tidy format
 
-library(flextable)
+library(flextable) # Use 'flextable' to render the summary table in a tidier format
 
 flex_data <- add_footer_lines(flextable(data_g), "Numeric information for all species")
 dlex_unique <- add_footer_lines(flextable(unique_g), "Numeric information for unique species")
+flex_diff <- add_footer_lines(flextable(differences), "Numeric information for differences between all and unique species")
+
+flex_data
+dlex_unique
+flex_diff
 ```
+
+Tabling the animal IDs, we can see that some IDs are repeated, such as '71' and '274'. Those samples are omitted along with samples containing missing values to simplify the analysis and remain consistent.
+
+'unique_g' and 'data_g' are numerical assessments for 'amount' of activity between control and elevated CO2 levels per fish species. The difference between the two exhibits the effect of duplicated (non-unique) on the data set, as shown by 'differences'. Standard error is a measure of data variation relative to sample size. In other words, quantifies how likely the sample mean represents the true population. Hence, the smaller the standard error, the more accurate our data set is. Because 'unique_g' only takes in unique data points, the sample size per group decreases, thus a large 'n' variation. This reflects the changes in mean and therefore, the overall decrease in standard error across all groups. 
+
+Although 'data_g' shows more accuracy mathematically, 'unique_g' is still the preferred data set logically. Duplicated data points incurs experimental bias and errors that skews the result drastically. This is seen in 'differences' when groups like 'ancantho CO2' and 'humbug control' exhibits a large positive skew of the mean value (2.545 and 2.492) along with a large number of non-unique sample size (22 and 21). 'whitedams control' may have a small mean change (0.418) relative to sample size (37), but it has the highest change in standard error (-1.075), showing inconsistency and bias. 
+
+Depending on the usage, different datasets will be used accordingly.
 
 # **Data Visualisation**
 
 ```{r, figure1, fig.align='center', fig.cap="Figure 1: Mean activity of species and treatment"}
 # ggplot figure showing mean activity for each treatment (Control, OA) for each species.
 library(ggplot2)
-ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment)) + labs(title = "Mean activity of each species depending on the treatment", x = "Species", y = "Mean activity")
+ggplot(unique_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment)) + labs(title = "Figure 1: Mean activity of each species depending on the treatment", x = "Species", y = "Mean activity")
 
 ```
+The figure above indicates the changes in fish activity according to levels of CO2 within the water. 'ancantho', 'chromis' and 'whitedams' tends to be more active under the control environment (400-450 uatm of CO2), while 'ambon', 'humbug' and 'lemons' exhibit more activity under elevated CO2 (850-1050 uatm of CO2). Simply looking at this graph, it is inconclusive whether the effects of CO2 affects the level of fish activity, which is coherent with the paper's evaluation.    
 
-```{r, savefig}
-# Use ggsave to save the figure
-library(png)
-
-ggplot(data_g, aes(y = mean, x = species)) + geom_point(aes(colour = treatment)) + 
-  labs(title = "Mean activity of each species depending on the treatment", x = "Species", y = "Mean activity") +
-  annotation_raster(raster1, 0.5,1.5,40,35) +
-  annotation_raster(as.raster(readPNG("./Files/pics/ambon.png")), 1.5,2.5,40,35) +
-  annotation_raster(as.raster(readPNG("./Files/pics/chromis.png")), 2.5,3.5, 40,35) +
-  annotation_raster(as.raster(readPNG("./Files/pics/humbug.png")), 3.5,4.5, 40,35) +
-  annotation_raster(as.raster(readPNG("./Files/pics/lemon.png")), 4.5,5.5,40,35) +
-  annotation_raster(as.raster(readPNG("./Files/pics/whitedams.png")),5.5, 6.5, 40,35)
-
-ggsave("./Files/Output/Figures/raster_plot.png", width = 6, height = 8)
-```
 
 # ** Statistical testing: 95% Confidence interval, t-statistics, df and p-value **
 
 ```{r, stats, echo=TRUE, eval=TRUE}
 # Analysing the mean and standard deviation to determine direction of statistical analysis
+
   # CO2 treatment analysis
 treat <- data_n[which(data_n$treatment == "CO2"),] %>% subset(select = -c(loc, animal_id, sl, size))
 mean(treat$activity) #29
@@ -120,7 +115,8 @@ sd(treat$activity) # 13
 control <- data_n[which(data_n$treatment == "control"),] %>% subset(select = -c(loc, animal_id, sl, size))
 mean(control$activity) # 28
 sd(control$activity) # 13
-  # Because both groups have the same standard deviation and very similar mean values, we can utilise the 2 sample t test
+  # Both groups have the same standard deviation and very similar mean values, we can utilise the 2 sample t test
+
 
 ### METHOD 1: Doing t test to each species individually
 ancantho <- data_n[which(data_n$species == "acantho"),] %>% subset(select = -c(loc, animal_id, sl, size))
@@ -152,7 +148,7 @@ test_lemon <- test_lemon[c(1:5)]
   # df = 47
   # p-value = 0.08
 test_chromis <- t.test(chromis$activity ~ chromis$treatment, var.equal = T)
-test_chromis <- ttest_chromis[c(1:5)]
+test_chromis <- test_chromis[c(1:5)]
   # Difference in mean = 1
   # 95% confidence interval = -8.4 to 5.7
   # t statistic = -0.4
@@ -167,24 +163,25 @@ test_humbug <- test_humbug[c(1:5)]
   # p-value = 0.02
 test_whitedams <- t.test(whitedams$activity ~ whitedams$treatment, var.equal = T) 
 test_whitedams <- test_whitedams[c(1:5)]
-tibble(test_whitedams = list()) %>% 
-   unnest_wider(test_whitedams, names_sep = "")
-]\
- # subset(select = c("statistic", "parameter", "p.value", "conf.int", "estimate"))
   # Difference in mean = 3
   # 95% confidence interval = -5.9 to 1.6
   # t statistic = -1
   # df = 119
   # p-value = 0.3
 
-### METHOD 2: Tried to do via ANOVA (Did not work)
-mod1 <- group_by(species) %>% (lm(activity ~ treatment * species, data = data_n)
+
+### METHOD 2: ANOVA table to assess overall differences
+mod1 <- (lm(activity ~ treatment, data = data_n))
 summary(mod1)
-
-  # Ancantho is the base level (Hence the first couple 'species' line shows the difference in means of that species compared to base level(Ancantho) when the treatment is held constant)
 ```
 
-```{r, table1, echo=TRUE, eval=TRUE, tab.cap = "T statistic summary of difference in treatment on the species"}
-final_table <- 
-  list(test_whitedams)
-```
+To do statistical analysis, we first have to look at the properties of the dataset to find which method would be most accurate for our test case. The mean and standard deviation for the treatment and control groups are 29, 13 and 28, 13 respectively. Because both groups have the same standard deviation (13) and very similar mean values (29 and 28), we can utilise the 2 sample t test.
+
+A 2 sample t test evaluates whether the difference between both group's responses are statistically significant or not. This test provides a test statistic which follows the student T distribution under the null hypothesis. In our test case, the null hypothesis states that there is no statistical significance between the population means, while the alternative states that there is.
+
+H_0 : There is no statistical significance between the treatment and control population's mean
+H_A : The difference of group means is not 0
+
+One method of further analysis is looking at the fish behaviour at different living conditions depending on each species. As such, we can extract all values from the same species type and use the "t.test" function to plot fish activity against treatment. Using the default significance level (a) of 0.05, we will observe its relationship with the p-value. The 95% confidence interval tells us that we are 95% confident the true population mean falls within a lower and upper bound. If the p-value is smaller than the significance, it is safe to reject the null hypothesis, meaning there is a statistical significance between the true population mean of control and treatment group. "humbug" is the only one which exhibit this behaviour, while the other fish species exhibit p-values larger than 0.05, therefore we fail to reject the null. Meaning, 4 of the 5 fish species does not show statistical significant difference in activity depending on CO2 levels. 
+
+The second method involves ANOVA for a similar statistical approach. It shows the degree of statistical significance between CO2 (Intercept) and control. The estimate for CO2 is 28.742 while the control group decreases its activity by 0.956 relative to CO2. CO2 has a very low p-value, suggesting statistical significance and a low probability of it occurring by chance. However, the p-value of control is 0.38 which is larger than 0.05. This suggests that we fail to reject the null and shows the overall statistical difference in activity between control and treatment is insignificant, while disregarding species type. 
