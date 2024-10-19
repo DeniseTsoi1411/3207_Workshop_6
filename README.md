@@ -4,6 +4,12 @@ The project focuses on fish activity depending on ocean acidification. This proj
 
 The analysis reviews the conclusion drawn from Clark et al (2020) in the paper "Ocean acidification does not impair the behaviour of coral reef fishes" where the authors contradicts the idea that increasing ocean CO2 levels increases susceptibility of coral reef fishes from behavioural and sensory impairments (i.e., Clark et al writes that ocean acidification has negligible effects on coral reef fish behaviour). Thus, the paper documents a three-year long study where they assess the number of seconds the fish remains active per minute, averaged across the duration of the study, in relations to the species and levels of CO2 in the water.
 
+Species name: Acantho = Acanthochromis; 
+              Ambon = Pomacentrus amboinensis; 
+              Chromis = Chromis atripectoralis; 
+              Humbug = Dascyllus aruanus; 
+              Lemon = Pomacentrus moluccensis
+
  
 The file used is called: "OA_activitydat_20190302_BIOL3207.csv". We looked at this dataset to find discrepencies in the original hypothesise that was established by the authors.
 
